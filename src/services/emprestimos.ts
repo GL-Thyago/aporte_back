@@ -1,15 +1,20 @@
-import { prisma } from "../utils/prisma"; // ajuste caminho
-import { addDays, format, } from "date-fns";
-import { ptBR } from "date-fns/locale";
+// src/services/emprestimos.ts
 
-const mapDias = {
-  "Domingo": 0,
-  "Segunda": 1,
-  "Terça": 2,
-  "Quarta": 3,
-  "Quinta": 4,
-  "Sexta": 5,
-  "Sábado": 6,
+import { prisma } from "../utils/prisma";
+import { addDays } from "date-fns";
+
+// Map com dias da semana e seus números correspondentes (0 = Domingo)
+const mapDias: Record<
+  "Domingo" | "Segunda" | "Terça" | "Quarta" | "Quinta" | "Sexta" | "Sábado",
+  number
+> = {
+  Domingo: 0,
+  Segunda: 1,
+  Terça: 2,
+  Quarta: 3,
+  Quinta: 4,
+  Sexta: 5,
+  Sábado: 6,
 };
 
 export async function criarEmprestimoService({
@@ -19,20 +24,20 @@ export async function criarEmprestimoService({
   juros,
   parcelas,
   data_inicial,
-  dias, 
+  dias,
 }: {
   cliente_id: number;
-  tipo: string;
+  tipo: "mensal" | "diário"; // restringe para tipos válidos
   valor: number;
   juros: number;
   parcelas: number;
-  data_inicial: string; // "YYYY-MM-DD"
-  dias: string[];
+  data_inicial: string; // formato "YYYY-MM-DD"
+  dias: Array<keyof typeof mapDias>; // só aceita dias válidos
 }) {
-  // 1. calcular valor final (juros)
-  const valorFinal = valor + (valor * (juros / 100));
+  // 1️⃣ Calcular valor final (com juros)
+  const valorFinal = valor + valor * (juros / 100);
 
-  // 2. criar o empréstimo
+  // 2️⃣ Criar o empréstimo no banco
   const emprestimo = await prisma.e1_emprestimo.create({
     data: {
       c1_id: cliente_id,
@@ -44,9 +49,8 @@ export async function criarEmprestimoService({
     },
   });
 
-  // 3. gerar parcelas
+  // 3️⃣ Gerar parcelas
   if (tipo === "mensal") {
-    // simplesmente +30 dias para cada parcela
     const valorParcela = valorFinal / parcelas;
     let dataParcela = new Date(data_inicial);
 
@@ -61,15 +65,16 @@ export async function criarEmprestimoService({
       });
     }
   } else {
-    // tipo diário – usa dias da semana selecionados
+    // tipo diário
     const valorParcela = valorFinal / parcelas;
     let data = new Date(data_inicial);
     let count = 0;
 
+    // converte dias em números para comparação com getDay()
+    const diasNumericosSelecionados = dias.map((d) => mapDias[d]);
+
     while (count < parcelas) {
-      const diaSemana = data.getDay(); // 0=Dom,1=Seg,...
-      // verifica se diaSemana está no array dias
-      const diasNumericosSelecionados = dias.map((d) => mapDias[d]);
+      const diaSemana = data.getDay();
       if (diasNumericosSelecionados.includes(diaSemana)) {
         await prisma.p1_parcela.create({
           data: {
@@ -80,7 +85,7 @@ export async function criarEmprestimoService({
         });
         count++;
       }
-      data = addDays(data, 1); // vai para próximo dia
+      data = addDays(data, 1);
     }
   }
 
