@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",           // versão JS gerada
+    "module": "CommonJS",         // para Node
+    "rootDir": "src",             // pasta dos arquivos TS
+    "outDir": "dist",             // pasta de saída
+    "strict": true,               // checagem estrita
+    "esModuleInterop": true,      // compatibilidade com módulos
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"]
+}
+
