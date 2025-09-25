@@ -10,6 +10,8 @@ export const mainRouter = Router();
 
 mainRouter.post('/cad/clientes', clienteController.cadastrarCliente);
 mainRouter.get('/list/clientes', clienteController.listClientes);
+mainRouter.delete('/deletar/cliente/:id', clienteController.deletClientes);
+
 mainRouter.post('/emprestar', emprestimosController.criarEmprestimo);
 
 // Listar empréstimos de um cliente específico

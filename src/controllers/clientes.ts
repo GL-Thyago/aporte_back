@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { createCliente, listClientes as listClientesService } from "../services/clientes";
+import { createCliente, deleteClienteService, listClientes as listClientesService } from "../services/clientes";
 
 // Cadastro de cliente
 export const cadastrarCliente: RequestHandler = async (req, res) => {
@@ -29,3 +29,21 @@ export const listClientes: RequestHandler = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+export const deletClientes: RequestHandler = async (req, res) => {
+  try {
+    const clienteId = Number(req.params.id);
+    await deleteClienteService(clienteId);
+    return res.json({ message: "✅ Cliente deletado com sucesso!" });
+  } catch (error: any) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ message: error.message || "Erro ao deletar cliente" }); 
+  }
+};
+
+
+
+
+
+
