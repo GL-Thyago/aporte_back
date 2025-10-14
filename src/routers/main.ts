@@ -22,6 +22,7 @@ mainRouter.get("/emprestimos/ativos", emprestimosController.listEmprestimosAtivo
 mainRouter.post('/emprestimos/pagarParcela', emprestimosController.pagarParcela);
 
 // mainRouter.get('/privatePing',verifyJWT , pingController.privatePing);
+mainRouter.get('/relatorio/home', emprestimosController.relatorioHome);
 
 
 

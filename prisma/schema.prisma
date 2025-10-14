@@ -72,6 +72,7 @@ model F1_colaborador {
   f1_telefone    String?  @db.VarChar(20)
   f1_cargo       String?  @db.VarChar(50)
   f1_salario     Decimal  @default(0) @db.Decimal(10, 2)
+  f1_caixa     Decimal  @default(0) @db.Decimal(10, 2)
   f1_status      String   @db.VarChar(20) @default("ativo")
   f1_createdAt   DateTime @default(now())
   f1_updatedAt   DateTime @updatedAt

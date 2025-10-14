@@ -225,3 +225,127 @@ export async function pagarParcela(req: Request, res: Response) {
   }
 }
 
+export async function relatorioHome(req: Request, res: Response) {
+  try {
+    // ========================
+    // CLIENTES
+    // ========================
+    const totalClientes = await prisma.c1_cliente.count({
+      where: { c1_status: "ativo" },
+    });
+
+    // ========================
+    // CAIXA
+    // ========================
+    const totalCaixa = await prisma.c1_cliente.aggregate({
+      _sum: { c1_caixa: true },
+    });
+
+    // ========================
+    // EMPRÉSTIMOS
+    // ========================
+    const totalEmprestimos = await prisma.e1_emprestimo.count();
+    const emprestimosAbertos = await prisma.e1_emprestimo.count({
+      where: { e1_status: "em aberto" },
+    });
+    const emprestimosAtrasados = await prisma.e1_emprestimo.count({
+      where: { e1_status: "atrasado" },
+    });
+    const emprestimosPagos = await prisma.e1_emprestimo.count({
+      where: { e1_status: "pago" },
+    });
+
+    // ========================
+    // PARCELAS
+    // ========================
+    const parcelasAbertas = await prisma.p1_parcela.count({
+      where: { p1_status: "em aberto" },
+    });
+    const parcelasPagas = await prisma.p1_parcela.count({
+      where: { p1_status: "pago" },
+    });
+    const parcelasAtrasadas = await prisma.p1_parcela.count({
+      where: { p1_status: "atrasado" },
+    });
+
+    // ========================
+    // LANÇAMENTOS FINANCEIROS DO DIA
+    // ========================
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const amanha = new Date(hoje);
+    amanha.setDate(hoje.getDate() + 1);
+
+    const lancamentosEntradaHoje = await prisma.l1_lancamento.aggregate({
+      _sum: { valor: true },
+      where: {
+        tipo: "entrada",
+        data_lancamento: {
+          gte: hoje,
+          lt: amanha,
+        },
+      },
+    });
+
+    const lancamentosSaidaHoje = await prisma.l1_lancamento.aggregate({
+      _sum: { valor: true },
+      where: {
+        tipo: "saida",
+        data_lancamento: {
+          gte: hoje,
+          lt: amanha,
+        },
+      },
+    });
+
+    // ========================
+    // EMPRÉSTIMOS DOS ÚLTIMOS 7 DIAS (para gráfico)
+    // ========================
+    const seteDiasAtras = new Date();
+    seteDiasAtras.setDate(seteDiasAtras.getDate() - 6);
+
+    const emprestimosUltimos7Dias = await prisma.e1_emprestimo.groupBy({
+      by: ["e1_data_inicial"],
+      _count: { e1_id: true },
+      where: {
+        e1_data_inicial: {
+          gte: seteDiasAtras,
+        },
+      },
+      orderBy: {
+        e1_data_inicial: "asc",
+      },
+    });
+
+    res.json({
+      clientes: {
+        total: totalClientes,
+      },
+      caixa: {
+        total: totalCaixa._sum.c1_caixa ?? 0,
+      },
+      emprestimos: {
+        total: totalEmprestimos,
+        abertos: emprestimosAbertos,
+        atrasados: emprestimosAtrasados,
+        pagos: emprestimosPagos,
+      },
+      parcelas: {
+        abertas: parcelasAbertas,
+        pagas: parcelasPagas,
+        atrasadas: parcelasAtrasadas,
+      },
+      lancamentosHoje: {
+        entrada: lancamentosEntradaHoje._sum.valor ?? 0,
+        saida: lancamentosSaidaHoje._sum.valor ?? 0,
+      },
+      graficoEmprestimos: emprestimosUltimos7Dias.map(item => ({
+        data: item.e1_data_inicial,
+        quantidade: item._count.e1_id,
+      })),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ erro: "Erro ao gerar relatório home" });
+  }
+}
