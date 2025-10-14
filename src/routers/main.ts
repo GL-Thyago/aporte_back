@@ -19,7 +19,7 @@ mainRouter.get("/cliente/:id/emprestimos", emprestimosController.listEmprestimos
 
 // Listar empréstimos de todos clientes ativos
 mainRouter.get("/emprestimos/ativos", emprestimosController.listEmprestimosAtivos);
-
+mainRouter.post('/emprestimos/pagarParcela', emprestimosController.pagarParcela);
 
 // mainRouter.get('/privatePing',verifyJWT , pingController.privatePing);
 
