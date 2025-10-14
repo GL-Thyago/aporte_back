@@ -1,120 +1,113 @@
-    generator client {
-      provider = "prisma-client-js"
-    }
+generator client {
+  provider = "prisma-client-js"
+}
 
-    datasource db {
-      provider = "mysql"
-      url      = env("DATABASE_URL")
-    }
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
 
-    // ========================
-    // CLIENTES
-    // ========================
-    model c1_cliente {
-      c1_id                    Int      @id @default(autoincrement())
-      c1_nome                  String   @db.VarChar(100)
-      c1_telefone              String?  @db.VarChar(20)
-      c1_telefone2             String?  @db.VarChar(20)
-      c1_cpf            String?  @db.VarChar(20)
-      c1_email                 String?  @db.VarChar(100)
-      c1_tipo_do_comercio      String?  @db.VarChar(100)
-      c1_endereco_comercio     String?  @db.VarChar(100)
-      c1_endereco_residencial  String?  @db.VarChar(100)
-      c1_status                String   @db.VarChar(20) @default("ativo")
-      c1_caixa                 Decimal  @default(0) @db.Decimal(10, 2)
-      c1_createdAt             DateTime @default(now())
-      c1_updatedAt             DateTime @updatedAt
+model C1_cliente {
+  c1_id                    Int      @id @default(autoincrement())
+  c1_nome                  String   @db.VarChar(100)
+  c1_telefone              String?  @db.VarChar(20)
+  c1_telefone2             String?  @db.VarChar(20)
+  c1_cpf                   String?  @db.VarChar(20)
+  c1_email                 String?  @db.VarChar(100)
+  c1_tipo_do_comercio      String?  @db.VarChar(100)
+  c1_endereco_comercio     String?  @db.VarChar(100)
+  c1_endereco_residencial  String?  @db.VarChar(100)
+  c1_status                String   @db.VarChar(20) @default("ativo")
+  c1_caixa                 Decimal  @default(0) @db.Decimal(10, 2)
+  c1_createdAt             DateTime @default(now())
+  c1_updatedAt             DateTime @updatedAt
 
-      emprestimos              e1_emprestimo[] // relacionamento com empréstimos
-    }
+  emprestimos              E1_emprestimo[]
 
-    // ========================
-    // EMPRÉSTIMOS
-    // ========================
-    model e1_emprestimo {
-      e1_id            Int      @id @default(autoincrement())
-      c1_id            Int
-      e1_data_inicial  DateTime
-      e1_status        String   @db.VarChar(20) @default("em aberto") // em aberto/pago/atrasado
-      e1_tipo          String   @db.VarChar(20) @default("diario")   // diario/mensal
-      e1_valor_inicial Decimal  @default(0) @db.Decimal(10, 2)
-      e1_valor_final   Decimal  @default(0) @db.Decimal(10, 2)
-      e1_porcentagem   Decimal  @default(0) @db.Decimal(10, 2)
-      e1_createdAt     DateTime @default(now())
-      e1_updatedAt     DateTime @updatedAt
+  @@map("c1_cliente")
+}
 
-      cliente          c1_cliente @relation(fields: [c1_id], references: [c1_id])
-      parcelas         p1_parcela[]
-    }
+model E1_emprestimo {
+  e1_id            Int      @id @default(autoincrement())
+  c1_id            Int
+  e1_data_inicial  DateTime
+  e1_status        String   @db.VarChar(20) @default("em aberto") // em aberto/pago/atrasado
+  e1_tipo          String   @db.VarChar(20) @default("diario")   // diario/mensal
+  e1_valor_inicial Decimal  @default(0) @db.Decimal(10, 2)
+  e1_valor_final   Decimal  @default(0) @db.Decimal(10, 2)
+  e1_porcentagem   Decimal  @default(0) @db.Decimal(10, 2)
+  e1_createdAt     DateTime @default(now())
+  e1_updatedAt     DateTime @updatedAt
 
-    // ========================
-    // PARCELAS
-    // ========================
-    model p1_parcela {
-      p1_id        Int      @id @default(autoincrement())
-      e1_id        Int
-      p1_data      DateTime
-      p1_status    String   @db.VarChar(20) @default("em aberto") // pago/atrasado
-      p1_valor     Decimal  @default(0) @db.Decimal(10, 2)
-      p1_createdAt DateTime @default(now())
-      p1_updatedAt DateTime @updatedAt
+  cliente          C1_cliente     @relation(fields: [c1_id], references: [c1_id])
+  parcelas         P1_parcela[]
 
-      emprestimo   e1_emprestimo @relation(fields: [e1_id], references: [e1_id])
-    }
+  @@map("e1_emprestimo")
+}
 
-    // ========================
-    // COLABORADORES / FUNCIONÁRIOS
-    // ========================
-    model f1_colaborador {
-      f1_id          Int      @id @default(autoincrement())
-      f1_nome        String   @db.VarChar(100)
-      f1_email       String?  @db.VarChar(100)
-      f1_telefone    String?  @db.VarChar(20)
-      f1_cargo       String?  @db.VarChar(50)
-      f1_salario     Decimal  @default(0) @db.Decimal(10, 2)
-      f1_caixa     Decimal  @default(0) @db.Decimal(10, 2)
-      f1_status      String   @db.VarChar(20) @default("ativo")
-      f1_createdAt   DateTime @default(now())
-      f1_updatedAt   DateTime @updatedAt
+model P1_parcela {
+  p1_id        Int      @id @default(autoincrement())
+  e1_id        Int
+  p1_data      DateTime
+  p1_status    String   @db.VarChar(20) @default("em aberto") // pago/atrasado
+  p1_valor     Decimal  @default(0) @db.Decimal(10, 2)
+  p1_createdAt DateTime @default(now())
+  p1_updatedAt DateTime @updatedAt
 
-      lancamentos    l1_lancamento[] // relacionamento com lançamentos
-    }
+  emprestimo   E1_emprestimo @relation(fields: [e1_id], references: [e1_id])
 
-    // ========================
-    // LANÇAMENTOS FINANCEIROS
-    // ========================
-    model l1_lancamento {
-      l1_id          Int      @id @default(autoincrement())
-      f1_id          Int?     // FK para colaborador (opcional, pode ser null se for outro tipo de lançamento)
-      descricao      String   @db.VarChar(200)
-      valor          Decimal  @db.Decimal(10, 2)
-      tipo           String   @db.VarChar(20) // entrada/saida
-      data_lancamento DateTime @default(now())
-      l1_createdAt   DateTime @default(now())
-      l1_updatedAt   DateTime @updatedAt
+  @@map("p1_parcela")
+}
 
-      colaborador    f1_colaborador? @relation(fields: [f1_id], references: [f1_id])
-    }
+model F1_colaborador {
+  f1_id          Int      @id @default(autoincrement())
+  f1_nome        String   @db.VarChar(100)
+  f1_email       String?  @db.VarChar(100)
+  f1_telefone    String?  @db.VarChar(20)
+  f1_cargo       String?  @db.VarChar(50)
+  f1_salario     Decimal  @default(0) @db.Decimal(10, 2)
+  f1_caixa       Decimal  @default(0) @db.Decimal(10, 2)
+  f1_status      String   @db.VarChar(20) @default("ativo")
+  f1_createdAt   DateTime @default(now())
+  f1_updatedAt   DateTime @updatedAt
 
-    // ========================
-    // CAIXA / CONTROLE DE SALDO
-    // ========================
-    model c1_caixa {
-      c1_id          Int      @id @default(autoincrement())
-      descricao      String   @db.VarChar(100)
-      saldo_inicial  Decimal  @default(0) @db.Decimal(10, 2)
-      saldo_atual    Decimal  @default(0) @db.Decimal(10, 2)
-      c1_createdAt   DateTime @default(now())
-      c1_updatedAt   DateTime @updatedAt
-    }
+  lancamentos    L1_lancamento[]
 
-    // ========================
-    // CONFIGURAÇÕES ADICIONAIS (opcional)
-    // ========================
-    model config {
-      config_id      Int      @id @default(autoincrement())
-      chave          String   @db.VarChar(100) @unique
-      valor          String   @db.Text
-      config_createdAt DateTime @default(now())
-      config_updatedAt DateTime @updatedAt
-    }
+  @@map("f1_colaborador")
+}
+
+model L1_lancamento {
+  l1_id           Int      @id @default(autoincrement())
+  f1_id           Int?     // FK para colaborador (opcional)
+  descricao       String   @db.VarChar(200)
+  valor           Decimal  @db.Decimal(10, 2)
+  tipo            String   @db.VarChar(20) // entrada/saida
+  data_lancamento DateTime @default(now())
+  l1_createdAt    DateTime @default(now())
+  l1_updatedAt    DateTime @updatedAt
+
+  colaborador     F1_colaborador? @relation(fields: [f1_id], references: [f1_id])
+
+  @@map("l1_lancamento")
+}
+
+model C1_caixa {
+  c1_id         Int      @id @default(autoincrement())
+  descricao     String   @db.VarChar(100)
+  saldo_inicial Decimal  @default(0) @db.Decimal(10, 2)
+  saldo_atual   Decimal  @default(0) @db.Decimal(10, 2)
+  c1_createdAt  DateTime @default(now())
+  c1_updatedAt  DateTime @updatedAt
+
+  @@map("c1_caixa")
+}
+
+model Config {
+  config_id        Int      @id @default(autoincrement())
+  chave            String   @db.VarChar(100) @unique
+  valor            String   @db.Text
+  config_createdAt DateTime @default(now())
+  config_updatedAt DateTime @updatedAt
+
+  @@map("config")
+}
