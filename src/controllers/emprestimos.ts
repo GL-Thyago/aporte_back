@@ -87,6 +87,7 @@ export async function listEmprestimosPorCliente(req: Request, res: Response) {
 
 // ------------------- LISTAR EMPRÉSTIMOS DE CLIENTES ATIVOS -------------------
 export async function listEmprestimosAtivos(req: Request, res: Response) {
+  console.log("atualizado")
   try {
     const emprestimos = await prisma.e1_emprestimo.findMany({
       where: {
@@ -101,6 +102,7 @@ export async function listEmprestimosAtivos(req: Request, res: Response) {
         (sum, p) => sum + Number(p.p1_valor),
         0
       );
+  console.log(dados);
 
       const quitadas = e.parcelas.filter((p) => p.p1_status === "pago");
       const atrasadas = e.parcelas.filter((p) => p.p1_status === "atrasado");
