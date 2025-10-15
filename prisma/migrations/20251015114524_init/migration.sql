@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE `C1_cliente` (
+CREATE TABLE `c1_cliente` (
     `c1_id` INTEGER NOT NULL AUTO_INCREMENT,
     `c1_nome` VARCHAR(100) NOT NULL,
     `c1_telefone` VARCHAR(20) NULL,
@@ -18,7 +18,7 @@ CREATE TABLE `C1_cliente` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `E1_emprestimo` (
+CREATE TABLE `e1_emprestimo` (
     `e1_id` INTEGER NOT NULL AUTO_INCREMENT,
     `c1_id` INTEGER NOT NULL,
     `e1_data_inicial` DATETIME(3) NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE `E1_emprestimo` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `P1_parcela` (
+CREATE TABLE `p1_parcela` (
     `p1_id` INTEGER NOT NULL AUTO_INCREMENT,
     `e1_id` INTEGER NOT NULL,
     `p1_data` DATETIME(3) NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE `P1_parcela` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `F1_colaborador` (
+CREATE TABLE `f1_colaborador` (
     `f1_id` INTEGER NOT NULL AUTO_INCREMENT,
     `f1_nome` VARCHAR(100) NOT NULL,
     `f1_email` VARCHAR(100) NULL,
@@ -63,7 +63,7 @@ CREATE TABLE `F1_colaborador` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `L1_lancamento` (
+CREATE TABLE `l1_lancamento` (
     `l1_id` INTEGER NOT NULL AUTO_INCREMENT,
     `f1_id` INTEGER NULL,
     `descricao` VARCHAR(200) NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE `L1_lancamento` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `C1_caixa` (
+CREATE TABLE `c1_caixa` (
     `c1_id` INTEGER NOT NULL AUTO_INCREMENT,
     `descricao` VARCHAR(100) NOT NULL,
     `saldo_inicial` DECIMAL(10, 2) NOT NULL DEFAULT 0,
@@ -89,22 +89,22 @@ CREATE TABLE `C1_caixa` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Config` (
+CREATE TABLE `config` (
     `config_id` INTEGER NOT NULL AUTO_INCREMENT,
     `chave` VARCHAR(100) NOT NULL,
     `valor` TEXT NOT NULL,
     `config_createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `config_updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `Config_chave_key`(`chave`),
+    UNIQUE INDEX `config_chave_key`(`chave`),
     PRIMARY KEY (`config_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `E1_emprestimo` ADD CONSTRAINT `E1_emprestimo_c1_id_fkey` FOREIGN KEY (`c1_id`) REFERENCES `C1_cliente`(`c1_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `e1_emprestimo` ADD CONSTRAINT `e1_emprestimo_c1_id_fkey` FOREIGN KEY (`c1_id`) REFERENCES `c1_cliente`(`c1_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `P1_parcela` ADD CONSTRAINT `P1_parcela_e1_id_fkey` FOREIGN KEY (`e1_id`) REFERENCES `E1_emprestimo`(`e1_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `p1_parcela` ADD CONSTRAINT `p1_parcela_e1_id_fkey` FOREIGN KEY (`e1_id`) REFERENCES `e1_emprestimo`(`e1_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `L1_lancamento` ADD CONSTRAINT `L1_lancamento_f1_id_fkey` FOREIGN KEY (`f1_id`) REFERENCES `F1_colaborador`(`f1_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `l1_lancamento` ADD CONSTRAINT `l1_lancamento_f1_id_fkey` FOREIGN KEY (`f1_id`) REFERENCES `f1_colaborador`(`f1_id`) ON DELETE SET NULL ON UPDATE CASCADE;
