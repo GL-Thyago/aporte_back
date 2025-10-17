@@ -163,7 +163,6 @@ export async function pagarParcela(req: Request, res: Response) {
     const valorPagoDecimal = new Decimal(valorPago);
     const jurosDecimal = new Decimal(juros);
 
-    // Atualiza a parcela original como paga
     await prisma.p1_parcela.update({
       where: { p1_id: parcelaId },
       data: {
@@ -172,16 +171,14 @@ export async function pagarParcela(req: Request, res: Response) {
       },
     });
 
-    // Se o valor pago for menor que o valor da parcela, cria nova parcela com juros
     if (valorPagoDecimal.lt(valorParcela)) {
       const valorDiferenca = valorParcela.minus(valorPagoDecimal);
 
       const jurosSobreDiferenca = valorDiferenca.mul(jurosDecimal.div(100));
       const valorNovaParcela = valorDiferenca.plus(jurosSobreDiferenca);
 
-      // ➕ Encontrar a última parcela do empréstimo
       const ultimaParcela = await prisma.p1_parcela.findFirst({
-        where: { p1_id_empretimo: parcela.e1_id },
+        where: { p1_id: parcela.p1_id },
         orderBy: { p1_data: "desc" },
       });
 
@@ -203,7 +200,7 @@ export async function pagarParcela(req: Request, res: Response) {
       // ➕ Criar nova parcela
       await prisma.p1_parcela.create({
         data: {
-          p1_id_emprestimo: parcela.e1_id,
+          p1_id_emprestimo: parcela.p1_id_emprestimo,
           p1_data: novaDataParcela,
           p1_status: "em aberto",
           p1_valor: valorNovaParcela.toNumber(),
@@ -212,7 +209,7 @@ export async function pagarParcela(req: Request, res: Response) {
 
       // ➕ Atualizar valor final do empréstimo
       await prisma.e1_emprestimo.update({
-        where: { e1_id: parcela.e1_id },
+        where: { e1_id: parcela.p1_id_emprestimo },
         data: {
           e1_valor_final: new Decimal(parcela.emprestimo.e1_valor_final).plus(valorNovaParcela),
         },
