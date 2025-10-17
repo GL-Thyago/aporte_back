@@ -56,16 +56,13 @@ export async function criarEmprestimoService({
 
     for (let i = 0; i < parcelas; i++) {
       if (i > 0) dataParcela = addDays(dataParcela, 30);
-    await prisma.p1_parcela.create({
-  data: {
-    p1_data: dataParcela,
-    p1_valor: valorParcela,
-    emprestimo: {
-      connect: { e1_id: emprestimo.e1_id },
-    },
-  },
-});
-
+      await prisma.p1_parcela.create({
+        data: {
+          p1_id_emprestimo: emprestimo.e1_id,
+          p1_data: dataParcela,
+          p1_valor: valorParcela,
+        },
+      });
     }
   } else {
     // tipo diário
@@ -81,9 +78,7 @@ export async function criarEmprestimoService({
       if (diasNumericosSelecionados.includes(diaSemana)) {
         await prisma.p1_parcela.create({
           data: {
-             emprestimo: {
-      connect: { e1_id: emprestimo.e1_id },
-    },
+            p1_id_emprestimo: emprestimo.e1_id,
             p1_data: data,
             p1_valor: valorParcela,
           },
