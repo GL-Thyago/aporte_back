@@ -102,7 +102,7 @@ export async function listEmprestimosAtivos(req: Request, res: Response) {
         (sum, p) => sum + Number(p.p1_valor),
         0
       );
-  console.log(dados);
+  // console.log(dados);
 
       const quitadas = e.parcelas.filter((p) => p.p1_status === "pago");
       const atrasadas = e.parcelas.filter((p) => p.p1_status === "atrasado");
@@ -181,7 +181,7 @@ export async function pagarParcela(req: Request, res: Response) {
 
       // ➕ Encontrar a última parcela do empréstimo
       const ultimaParcela = await prisma.p1_parcela.findFirst({
-        where: { e1_id: parcela.e1_id },
+        where: { p1_id_empretimo: parcela.e1_id },
         orderBy: { p1_data: "desc" },
       });
 
@@ -203,7 +203,7 @@ export async function pagarParcela(req: Request, res: Response) {
       // ➕ Criar nova parcela
       await prisma.p1_parcela.create({
         data: {
-          e1_id: parcela.e1_id,
+          p1_id_emprestimo: parcela.e1_id,
           p1_data: novaDataParcela,
           p1_status: "em aberto",
           p1_valor: valorNovaParcela.toNumber(),

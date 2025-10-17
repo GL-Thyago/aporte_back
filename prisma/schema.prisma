@@ -47,14 +47,14 @@ model E1_emprestimo {
 
 model P1_parcela {
   p1_id        Int      @id @default(autoincrement())
-  e1_id        Int
+  p1_id_emprestimo        Int
   p1_data      DateTime
   p1_status    String   @db.VarChar(20) @default("em aberto") // pago/atrasado
   p1_valor     Decimal  @default(0) @db.Decimal(10, 2)
   p1_createdAt DateTime @default(now())
   p1_updatedAt DateTime @updatedAt
 
-  emprestimo   E1_emprestimo @relation(fields: [e1_id], references: [e1_id])
+  emprestimo   E1_emprestimo @relation(fields: [p1_id_emprestimo], references: [e1_id])
 
   @@map("p1_parcela")
 }
