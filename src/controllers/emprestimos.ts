@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { criarEmprestimoService } from "../services/emprestimos";
+import { criarEmprestimoService, pegarDadosParcelas } from "../services/emprestimos";
 import { prisma } from "../utils/prisma"; // seu client Prisma
 import { Decimal } from "@prisma/client/runtime/library";
 import dayjs from "dayjs";
+import { caixaAdm, novoLancamento } from "../services/caixa";
 
 // ------------------- CRIAR EMPRÉSTIMO -------------------
 export async function criarEmprestimo(req: Request, res: Response) {
@@ -12,6 +13,21 @@ export async function criarEmprestimo(req: Request, res: Response) {
     if (!cliente_id || !tipo || !valor || !juros || !parcelas || !data_inicial) {
       return res.status(400).json({ message: "Campos obrigatórios faltando" });
     }
+
+    const tipoEntradaSaida: "entrada" | "saida" = "saida";
+
+    const atualizarCaixa = await caixaAdm({
+      tipoEntradaSaida,
+      valor: Number(valor),
+    });
+
+     const Lancamento = await novoLancamento({
+          tipo,
+          valor: Number(valor),
+          descricao: "EMPRESTIMO",
+          id: atualizarCaixa.f1_id,
+          id_parcela: Number(cliente_id),
+        });
 
     const emprestimo = await criarEmprestimoService({
       cliente_id: Number(cliente_id),
@@ -24,9 +40,16 @@ export async function criarEmprestimo(req: Request, res: Response) {
     });
 
     return res.status(201).json({ message: "Empréstimo criado com sucesso", emprestimo });
-  } catch (err: any) {
+  }catch (err: any) {
     console.error(err);
-    return res.status(500).json({ message: err.message });
+
+    const mensagem = err?.message || "Erro desconhecido.";
+
+    if (mensagem.includes("Dinheiro em caixa insuficiente para realizar esta operação.")) {
+      return res.status(400).json({ message: mensagem });
+    }
+
+    return res.status(500).json({ message: "Erro interno no servidor." });
   }
 }
 
@@ -87,7 +110,6 @@ export async function listEmprestimosPorCliente(req: Request, res: Response) {
 
 // ------------------- LISTAR EMPRÉSTIMOS DE CLIENTES ATIVOS -------------------
 export async function listEmprestimosAtivos(req: Request, res: Response) {
-  console.log("atualizado")
   try {
     const emprestimos = await prisma.e1_emprestimo.findMany({
       where: {
@@ -150,12 +172,13 @@ export async function pagarParcela(req: Request, res: Response) {
   }
 
   try {
-    const parcela = await prisma.p1_parcela.findUnique({
-      where: { p1_id: parcelaId },
-      include: {
-        emprestimo: true,
-      },
-    });
+    const parcela = await pegarDadosParcelas({parcelaId});
+    // const parcela = await prisma.p1_parcela.findUnique({
+    //   where: { p1_id: parcelaId },
+    //   include: {
+    //     emprestimo: true,
+    //   },
+    // });
 
     if (!parcela) return res.status(404).json({ error: "Parcela não encontrada." });
 
@@ -215,6 +238,21 @@ export async function pagarParcela(req: Request, res: Response) {
         },
       });
     }
+const clienteId = parcela?.emprestimo?.cliente?.c1_id;
+        const tipoEntradaSaida: "entrada" | "saida" = "entrada";
+
+    const atualizarCaixa = await caixaAdm({
+      tipoEntradaSaida,
+      valor: Number(valorPagoDecimal),
+    });
+
+     const Lancamento = await novoLancamento({
+          tipo: "pagamento_cliente",
+          valor: Number(valorPagoDecimal),
+          descricao: "EMPRESTIMO",
+          id: atualizarCaixa.f1_id,
+          id_parcela: Number(clienteId),
+        });
 
     return res.status(200).json({ message: "Parcela paga com sucesso." });
 

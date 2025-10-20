@@ -78,7 +78,8 @@ model F1_colaborador {
 
 model L1_lancamento {
   l1_id           Int      @id @default(autoincrement())
-  f1_id           Int?     // FK para colaborador (opcional)
+  f1_id           Int?     
+  id_parcela          Int? 
   descricao       String   @db.VarChar(200)
   valor           Decimal  @db.Decimal(10, 2)
   tipo            String   @db.VarChar(20) // entrada/saida

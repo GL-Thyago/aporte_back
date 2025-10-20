@@ -1,9 +1,6 @@
-// src/services/emprestimos.ts
-
 import { prisma } from "../utils/prisma";
 import { addDays } from "date-fns";
 
-// Map com dias da semana e seus números correspondentes (0 = Domingo)
 const mapDias: Record<
   "Domingo" | "Segunda" | "Terça" | "Quarta" | "Quinta" | "Sexta" | "Sábado",
   number
@@ -91,3 +88,18 @@ export async function criarEmprestimoService({
 
   return emprestimo;
 }
+
+export async function pegarDadosParcelas({parcelaId} : {parcelaId: number}){
+  const parcela = await prisma.p1_parcela.findUnique({
+  where: { p1_id: parcelaId },
+  include: {
+    emprestimo: {
+      include: {
+        cliente: true, 
+      },
+    },
+  },
+})
+return parcela;
+}
+

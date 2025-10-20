@@ -3,7 +3,6 @@ import { createCliente, deleteClienteService, listClientes as listClientesServic
 
 // Cadastro de cliente
 export const cadastrarCliente: RequestHandler = async (req, res) => {
-    console.log(12)
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Método não permitido" });
   }
